@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APIForge — Instant REST API from Database Schema</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;
+  --text:#e4e4ef;--muted:#8888a0;--accent:#6366f1;--accent2:#818cf8;
+  --green:#22c55e;--orange:#f59e0b;--red:#ef4444;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,0.85);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+nav .container{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:800;font-size:1.25rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{color:var(--muted);font-size:0.9rem;font-weight:500;transition:color 0.2s}
+.nav-links a:hover{color:var(--text)}
+.btn{padding:10px 20px;border-radius:8px;font-weight:600;font-size:0.9rem;cursor:pointer;transition:all 0.2s;border:none;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent)}
+
+/* Hero */
+.hero{padding:160px 0 100px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(99,102,241,0.12) 0%,transparent 70%);pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);font-size:0.8rem;font-weight:600;color:var(--accent2);margin-bottom:24px}
+h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:24px;letter-spacing:-0.03em}
+h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.2rem;color:var(--muted);max-width:600px;margin:0 auto 40px;line-height:1.7}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.hero .btn{padding:14px 28px;font-size:1rem}
+.code-block{max-width:640px;margin:60px auto 0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;text-align:left}
+.code-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.code-dot{width:12px;height:12px;border-radius:50%}
+.code-dot.red{background:#ff5f57}
+.code-dot.yellow{background:#febc2e}
+.code-dot.green{background:#28c840}
+.code-body{padding:20px 24px;font-family:'SF Mono','Fira Code',monospace;font-size:0.85rem;color:var(--muted);line-height:1.8}
+.code-body .cmd{color:var(--green)}
+.code-body .flag{color:var(--orange)}
+.code-body .comment{color:var(--muted);opacity:0.6}
+
+/* Stats */
+.stats{display:flex;justify-content:center;gap:60px;padding:40px 0 80px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:800;color:var(--accent2)}
+.stat-label{font-size:0.85rem;color:var(--muted);margin-top:4px}
+
+/* Section */
+section{padding:100px 0}
+.section-label{font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:16px}
+h2{font-size:clamp(2rem,3.5vw,2.8rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:20px}
+.section-desc{font-size:1.1rem;color:var(--muted);max-width:600px;line-height:1.7}
+
+/* Problem */
+.problem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.problem-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px}
+.problem-icon{font-size:2rem;margin-bottom:16px}
+.problem-card h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.problem-card p{font-size:0.9rem;color:var(--muted);line-height:1.6}
+
+/* Features */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;margin-top:48px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px;transition:border-color 0.2s}
+.feature-card:hover{border-color:var(--accent)}
+.feature-icon{width:48px;height:48px;border-radius:10px;background:rgba(99,102,241,0.1);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:20px}
+.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.feature-card p{font-size:0.9rem;color:var(--muted);line-height:1.6}
+
+/* How it works */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:32px;margin-top:48px}
+.step{text-align:center}
+.step-num{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;margin:0 auto 20px}
+.step h3{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.step p{font-size:0.9rem;color:var(--muted);line-height:1.6}
+
+/* Comparison */
+.comparison-table{width:100%;border-collapse:collapse;margin-top:48px;font-size:0.9rem}
+.comparison-table th,.comparison-table td{padding:14px 16px;text-align:center;border-bottom:1px solid var(--border)}
+.comparison-table th{background:var(--surface);font-weight:600;color:var(--muted);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em}
+.comparison-table th:first-child,.comparison-table td:first-child{text-align:left;font-weight:600;color:var(--text)}
+.comparison-table tr:first-child th:first-child{border-radius:8px 0 0 0}
+.comparison-table tr:first-child th:last-child{border-radius:0 8px 0 0}
+.comparison-table .highlight{color:var(--green);font-weight:700}
+.comparison-table .no{color:var(--red);opacity:0.5}
+.comparison-table tr:hover td{background:rgba(99,102,241,0.03)}
+
+/* Pricing */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:48px}
+.pricing-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;position:relative;transition:border-color 0.2s}
+.pricing-card:hover{border-color:var(--accent)}
+.pricing-card.popular{border-color:var(--accent);box-shadow:0 0 40px rgba(99,102,241,0.1)}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:4px 16px;border-radius:100px;font-size:0.75rem;font-weight:700}
+.pricing-card h3{font-size:1.25rem;font-weight:700;margin-bottom:8px}
+.pricing-card .price{font-size:3rem;font-weight:900;margin:16px 0}
+.pricing-card .price span{font-size:1rem;font-weight:500;color:var(--muted)}
+.pricing-card .price .free{font-size:2.5rem}
+.pricing-features{list-style:none;margin:24px 0}
+.pricing-features li{padding:8px 0;font-size:0.9rem;color:var(--muted);display:flex;align-items:center;gap:10px}
+.pricing-features li::before{content:'✓';color:var(--green);font-weight:700}
+.pricing-card .btn{width:100%;justify-content:center;margin-top:24px}
+
+/* FAQ */
+.faq-list{max-width:720px;margin:48px auto 0}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;padding:24px 0;background:none;border:none;color:var(--text);font-size:1.05rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:inherit}
+.faq-q:hover{color:var(--accent2)}
+.faq-a{padding:0 0 24px;color:var(--muted);line-height:1.7;font-size:0.95rem;display:none}
+.faq-a.open{display:block}
+.faq-arrow{transition:transform 0.2s;color:var(--muted)}
+.faq-arrow.open{transform:rotate(180deg)}
+
+/* CTA */
+.cta{text-align:center;padding:120px 0}
+.cta h2{margin-bottom:16px}
+.cta p{color:var(--muted);margin-bottom:40px;font-size:1.1rem}
+.cta .btn{padding:16px 36px;font-size:1.05rem}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:40px 0;text-align:center}
+footer p{color:var(--muted);font-size:0.85rem}
+footer a{color:var(--accent2)}
+
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hero{padding:120px 0 60px}
+  .stats{gap:32px}
+  section{padding:60px 0}
+  .comparison-table{font-size:0.8rem}
+  .comparison-table th,.comparison-table td{padding:10px 8px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="#" class="logo">APIForge</a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/crazycompanyinc/apiforge" class="btn btn-outline">GitHub</a>
+      <a href="#pricing" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="badge">⚡ v1.0 — Now Open Source</div>
+    <h1>Instant REST API from<br><span>Your Database Schema</span></h1>
+    <p>Stop writing boilerplate CRUD code. APIForge reads your PostgreSQL, MySQL, or SQLite database and generates a production-ready REST API with auth, docs, and typed SDKs in seconds.</p>
+    <div class="hero-buttons">
+      <a href="#pricing" class="btn btn-primary">Start Free →</a>
+      <a href="https://github.com/crazycompanyinc/apiforge" class="btn btn-outline">⭐ Star on GitHub</a>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div>
+        <div class="code-dot yellow"></div>
+        <div class="code-dot green"></div>
+      </div>
+      <div class="code-body">
+        <span class="comment"># Install APIForge</span><br>
+        <span class="cmd">npm</span> i -g apiforge<br><br>
+        <span class="comment"># Generate REST API from your existing database</span><br>
+        <span class="cmd">apiforge</span> generate <span class="flag">--db</span> postgres://localhost/mydb <span class="flag">--output</span> ./api<br><br>
+        <span class="comment"># Done. Your API is running at localhost:3000</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Databases Supported</div></div>
+      <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Tables → Endpoints</div></div>
+      <div class="stat"><div class="stat-num">&lt;5s</div><div class="stat-label">Setup Time</div></div>
+      <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">Open Source</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="problem">
+  <div class="container">
+    <div class="section-label">The Problem</div>
+    <h2>Building APIs is broken</h2>
+    <p class="section-desc">Every developer has written the same CRUD endpoints dozens of time. It's repetitive, error-prone, and wastes hours that could be spent on actual features.</p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">⏰</div>
+        <h3>Hours of Boilerplate</h3>
+        <p>Writing the same GET, POST, PUT, DELETE endpoints for every table. Validation, error handling, pagination — all from scratch.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔒</div>
+        <h3>Auth From Scratch</h3>
+        <p>Every project needs JWT auth, rate limiting, and user management. Building it once is hard. Building it repeatedly is insane.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📄</div>
+        <h3>Docs Drift</h3>
+        <p>Your API docs are always out of date. OpenAPI specs need manual maintenance. SDKs need separate generation pipelines.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🔄</div>
+        <h3>Schema Changes Break Everything</h3>
+        <p>Add a column, rename a field, change a type — and suddenly your API, docs, and SDKs are all out of sync.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2>Everything you need,<br>nothing you don't</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🗄️</div>
+        <h3>Multi-Database</h3>
+        <p>PostgreSQL, MySQL, SQLite — APIForge connects to your existing database. No migration required.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3>Auth Built-In</h3>
+        <p>JWT authentication, role-based access control, and rate limiting come pre-configured out of the box.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Typed SDKs</h3>
+        <p>Auto-generate TypeScript and Python SDKs from your API schema. Always in sync, always typed.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📖</div>
+        <h3>OpenAPI Docs</h3>
+        <p>Interactive Swagger UI generated automatically. Try endpoints, see schemas, copy curl commands.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Smart Filtering</h3>
+        <p>Query any field with operators: eq, neq, gt, lt, like, in. Pagination and sorting built in.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>GitHub Action</h3>
+        <p>Regenerate your API on every schema change. Keep everything in sync automatically in CI/CD.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <h2>Three steps to a<br>production-ready API</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Connect Your Database</h3>
+        <p>Point APIForge at your existing PostgreSQL, MySQL, or SQLite database. No migration needed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Generate</h3>
+        <p>Run one command. APIForge reads your schema and generates REST endpoints, auth, docs, and SDKs.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Ship</h3>
+        <p>Deploy anywhere. Self-host, use our GitHub Action, or integrate into your existing CI/CD pipeline.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="comparison">
+  <div class="container">
+    <div class="section-label">Comparison</div>
+    <h2>How APIForge compares</h2>
+    <div style="overflow-x:auto">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>APIForge</th>
+          <th>PostgREST</th>
+          <th>Supabase</th>
+          <th>Hasura</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Zero-config</td><td class="highlight">✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Works with existing DB</td><td class="highlight">✅</td><td>✅</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Auth built-in</td><td class="highlight">✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+        <tr><td>Typed SDKs</td><td class="highlight">✅</td><td>❌</td><td>✅</td><td>❌</td></tr>
+        <tr><td>OpenAPI docs</td><td class="highlight">✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+        <tr><td>Free tier</td><td class="highlight">✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+        <tr><td>Self-hosted</td><td class="highlight">✅</td><td>✅</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Multi-DB support</td><td class="highlight">✅</td><td>Postgres only</td><td>Postgres only</td><td>✅</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Start free, scale when ready</h2>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <div class="price"><span class="free">$0</span><span>/mo</span></div>
+        <p style="color:var(--muted);font-size:0.9rem">Perfect for side projects</p>
+        <ul class="pricing-features">
+          <li>1 table</li>
+          <li>Basic CRUD endpoints</li>
+          <li>OpenAPI docs</li>
+          <li>Community support</li>
+        </ul>
+        <a href="https://github.com/crazycompanyinc/apiforge" class="btn btn-outline">Get Started</a>
+      </div>
+      <div class="pricing-card popular">
+        <div class="popular-badge">POPULAR</div>
+        <h3>Pro</h3>
+        <div class="price">$29<span>/mo</span></div>
+        <p style="color:var(--muted);font-size:0.9rem">For growing projects</p>
+        <ul class="pricing-features">
+          <li>Unlimited tables</li>
+          <li>JWT auth + RBAC</li>
+          <li>TypeScript & Python SDKs</li>
+          <li>Smart filtering & pagination</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Start Free Trial</a>
+      </div>
+      <div class="pricing-card">
+        <h3>Team</h3>
+        <div class="price">$79<span>/mo</span></div>
+        <p style="color:var(--muted);font-size:0.9rem">For teams & organizations</p>
+        <ul class="pricing-features">
+          <li>Everything in Pro</li>
+          <li>Unlimited projects</li>
+          <li>GitHub Action integration</li>
+          <li>Priority support</li>
+          <li>Custom domains</li>
+        </ul>
+        <a href="#" class="btn btn-outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2>Frequently asked questions</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Does APIForge work with my existing database?<span class="faq-arrow">▾</span></button>
+        <div class="faq-a">Yes! APIForge connects to your existing PostgreSQL, MySQL, or SQLite database. No migration, no schema changes required. It reads your schema and generates the API layer on top.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Is APIForge really free?<span class="faq-arrow">▾</span></button>
+        <div class="faq-a">The Free tier is free forever for 1 table with basic CRUD. The Pro and Team plans unlock unlimited tables, auth, SDKs, and more. The core CLI is also open-source under MIT.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How is this different from PostgREST?<span class="faq-arrow">▾</span></button>
+        <div class="faq-a">PostgREST is powerful but requires significant configuration and only supports PostgreSQL. APIForge is zero-config, supports multiple databases, includes auth, generates typed SDKs, and provides OpenAPI docs out of the box.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Can I self-host APIForge?<span class="faq-arrow">▾</span></button>
+        <div class="faq-a">Absolutely. APIForge is MIT-licensed open source. You can run the generated API anywhere — your own servers, Docker, Kubernetes, or any cloud provider.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What about schema changes?<span class="faq-arrow">▾</span></button>
+        <div class="faq-a">Run <code style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:0.85rem">apiforge generate</code> again after any schema change. Your API, docs, and SDKs will be regenerated to match. Use our GitHub Action to automate this.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="container">
+    <h2>Stop writing boilerplate.<br>Start shipping.</h2>
+    <p>Generate your first REST API in under 5 seconds. Free forever for side projects.</p>
+    <a href="https://github.com/crazycompanyinc/apiforge" class="btn btn-primary">Get Started Free →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>© 2026 APIForge by <a href="https://zootechnologies.com">ZOO Technologies</a>. Open source under MIT.</p>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn){
+  const ans = btn.nextElementSibling;
+  const arrow = btn.querySelector('.faq-arrow');
+  const isOpen = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a=>a.classList.remove('open'));
+  document.querySelectorAll('.faq-arrow').forEach(a=>a.classList.remove('open'));
+  if(!isOpen){ans.classList.add('open');arrow.classList.add('open')}
+}
+</script>
+</body>
+</html>
